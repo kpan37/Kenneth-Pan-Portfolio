@@ -1,0 +1,114 @@
+import matplotlib.pyplot as plt
+import numpy as np
+
+
+def txt_to_matrix(filename):
+    matrix = []
+    
+    # Open the file for reading
+    with open(filename, 'r') as file:
+        # Read each line in the file
+        for line in file:
+            # Strip any leading/trailing whitespace (including newline characters)
+            line = line.strip()
+            # Split the line into elements (by spaces or commas)
+            elements = line.split()  # Change to line.split(',') if elements are comma-separated
+            
+            # Convert elements to appropriate data types if necessary
+            # For example, if the matrix consists of numbers, you can use:
+            # elements = [int(el) for el in elements]   # If the elements are integers
+            # elements = [float(el) for el in elements] # If the elements are floating-point numbers
+            
+            # Append the row (list of elements) to the matrix
+            matrix.append(elements)
+    
+    return matrix
+
+
+filename = '044to1998.txt'
+matrix = txt_to_matrix(filename)
+
+#defining lists here
+force, disp, cycle, slope,stiffness = [], [], [], [], []
+
+slopecalc=0
+cyclenum=0
+
+#creates matrix lists of force, displacement, and cycle number, cycle num needs fix
+for row in matrix[:]:
+    try:
+        if len(row) != 0:
+            force.append(row[3])
+            disp.append(row[2])
+    except IndexError:
+        print(row)
+
+
+'''
+for i in range(0, len(col), 102):
+    cycle.append(col[i])
+
+'''
+    
+for i in range(0, len(matrix[:]), 102):
+    cycle.append(matrix[i][0])  # Append the first column value at every 102nd index
+
+    
+f = np.array(force)
+d = np.array(disp)
+
+
+'''
+for j in matrix[:1000]:
+    for i in force[:102]: #this for loop calculates the stiffness linear estimate of a cycle
+        Y1 = float(max(force[:102]))
+        Y2 = float(min(force[:102]))
+        index1 = force.index(max(force[:102]))
+        index2 = force.index(min(force[:102]))
+        X1 = float(disp[index1])
+        X2 = float(disp[index2])
+        stiff = (Y2-Y1)/(X2-X1)
+    stiffness.append(stiff)
+'''
+
+
+for j in range(0, len(force[:]), 102):  # Loop through the force array in blocks of 102
+    # Slice the current block of force and displacement
+    current_force = force[j:j+102]
+    current_disp = disp[j:j+102]
+    
+    # Calculate stiffness for this block
+    Y1 = float(max(current_force))
+    Y2 = float(min(current_force))
+    index1 = current_force.index(max(current_force))
+    index2 = current_force.index(min(current_force))
+    X1 = float(current_disp[index1])
+    X2 = float(current_disp[index2])
+    
+    stiff = (Y2 - Y1) / (X2 - X1+0.0000000001)
+    
+    # Append the calculated stiffness
+    stiffness.append(stiff)
+
+    
+stiffness.pop()
+cycle.pop()
+    
+print(stiffness)
+print((cycle))
+print((cycle[-1]))
+
+#plots rough stiffness vs cycle  
+plt.plot(cycle, stiffness, '.', markersize=1, label='stiffness')  # Adjust markersize to make points smaller
+plt.legend()
+plt.show()
+
+
+
+
+
+
+
+
+
+
